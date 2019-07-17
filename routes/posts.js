@@ -3,15 +3,10 @@ const router = express.Router();
 const verify = require("./verifyToken");
 const Post = require("../models/Post");
 
-router.get("/", verify, async (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    res.json({
-      posts: {
-        description: "post you shoudnt access"
-      }
-    });
-    // const posts = await Post.find();
-    // res.json(posts);
+    const posts = await Post.find();
+    res.json(posts);
   } catch (err) {
     res.json({ message: error });
   }
