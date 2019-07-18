@@ -1,5 +1,64 @@
 const mongoose = require("mongoose");
+//
+const classroomSchema = new mongoose.Schema({
+  className: {
+    type: String,
+    required: true
+  },
 
-const classroomSchema = new mongoose.Schema({});
+  creationDate: {
+    type: Date,
+    default: Date.now
+  },
+
+  students: [
+    {
+      studentId: {
+        type: String
+      },
+      joinDate: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ],
+
+  teachers: [
+    {
+      teacherId: {
+        type: String
+      }
+    }
+  ],
+
+  assignments: [
+    {
+      assignmentId: {
+        type: String
+      }
+    }
+  ],
+
+  announcements: [
+    {
+      teacherId: {
+        type: String
+      },
+      title: {
+        type: String
+      },
+      body: {
+        type: String
+      },
+      viewedBy: [
+        {
+          studentId: {
+            type: String
+          }
+        }
+      ]
+    }
+  ]
+});
 
 module.exports = mongoose.model("Classroom", classroomSchema);
