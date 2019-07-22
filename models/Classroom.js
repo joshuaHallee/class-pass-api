@@ -41,22 +41,9 @@ const classroomSchema = new mongoose.Schema({
 
   announcements: [
     {
-      teacherId: {
+      announcementId: {
         type: String
-      },
-      title: {
-        type: String
-      },
-      body: {
-        type: String
-      },
-      viewedBy: [
-        {
-          studentId: {
-            type: String
-          }
-        }
-      ]
+      }
     }
   ]
 });
