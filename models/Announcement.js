@@ -6,7 +6,7 @@ const announcementSchema = new mongoose.Schema({
   description: { type: String, required: true },
   creationDate: { type: Date, default: Date.now },
   isPublished: { type: Boolean, default: false },
-  isModified: { type: Boolean, default: false },
+  isEdited: { type: Boolean, default: false },
   modifiedDate: { type: Date, default: Date.now }
 });
 
