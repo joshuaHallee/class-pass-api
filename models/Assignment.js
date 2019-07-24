@@ -12,7 +12,7 @@ const assignmentSchema = new mongoose.Schema({
       studentId: { type: String },
       submissionDate: { type: Date, default: Date.now },
       submissionText: { type: String },
-      isModified: { type: Boolean, default: false },
+      isEdited: { type: Boolean, default: false },
       modifiedDate: { type: Date, default: Date.now }
     }
   ],
@@ -22,7 +22,7 @@ const assignmentSchema = new mongoose.Schema({
       viewDate: { type: Date, default: Date.now }
     }
   ],
-  isModified: { type: Boolean, default: false },
+  isEdited: { type: Boolean, default: false },
   modifiedDate: { type: Date, default: Date.now }
 });
 
