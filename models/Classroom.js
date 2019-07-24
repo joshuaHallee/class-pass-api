@@ -1,49 +1,29 @@
 const mongoose = require("mongoose");
 //
 const classroomSchema = new mongoose.Schema({
-  className: {
-    type: String,
-    required: true
-  },
-
-  creationDate: {
-    type: Date,
-    default: Date.now
-  },
-
+  className: { type: String, required: true },
+  creationDate: { type: Date, default: Date.now },
   students: [
     {
-      studentId: {
-        type: String
-      },
-      joinDate: {
-        type: Date,
-        default: Date.now
-      }
+      studentId: { type: String },
+      joinDate: { type: Date, default: Date.now }
     }
   ],
-
   teachers: [
     {
-      teacherId: {
-        type: String
-      }
+      teacherId: { type: String }
     }
   ],
 
   assignments: [
     {
-      assignmentId: {
-        type: String
-      }
+      assignmentId: { type: String }
     }
   ],
 
   announcements: [
     {
-      announcementId: {
-        type: String
-      }
+      announcementId: { type: String }
     }
   ]
 });
