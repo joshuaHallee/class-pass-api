@@ -3,7 +3,9 @@ const router = express.Router();
 const verify = require("./verifyToken");
 const Post = require("../models/Post");
 
-router.get("/", async (req, res) => {
+//add 'verify' to make a private route
+
+router.get("/", verify, async (req, res) => {
   try {
     const posts = await Post.find();
     res.json(posts);
