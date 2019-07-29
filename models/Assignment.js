@@ -14,7 +14,7 @@ const assignmentSchema = new mongoose.Schema({
       submissionText: { type: String },
       isEdited: { type: Boolean, default: false },
       modifiedDate: { type: Date, default: Date.now },
-      score: { type: Float32Array, default: 0.0 }
+      score: { type: Number, default: 0.0 }
     }
   ],
   viewedBy: [
