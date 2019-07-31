@@ -10,9 +10,12 @@ const userSchema = new mongoose.Schema({
     isStudent: { type: Boolean, required: true },
     isParent: { type: Boolean, required: true }
   },
+  classrooms: {
+    classroomId: { type: String }
+  },
   email: { type: String, required: true },
   password: { type: String, required: true, max: 1024 },
-  dateCreated: { type: Date, default: Date.now }
+  creationDate: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model("User", userSchema);
