@@ -3,6 +3,7 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const verify = require("./verifyToken");
 const Classroom = require("../models/Classroom");
+const Assignment = require("../models/Assignment");
 
 router.get("/", verify, async (req, res) => {
   try {
@@ -19,19 +20,15 @@ router.post("/", verify, async (req, res) => {
     process.env.TOKEN_SECRET
   );
 
-  //data MUST be wrapped in [ ] to push to array as object
-  var data = [];
-  data.push(verified._id);
-
   const classroom = new Classroom({
     className: req.body.className,
     createdBy: verified._id,
-    teachers: [data],
+    teachers: {
+      teacherId: verified._id
+    },
     assignments: [],
     announcements: []
   });
-
-  console.log(classroom);
 
   try {
     const savedClassroom = await classroom.save();
@@ -41,34 +38,38 @@ router.post("/", verify, async (req, res) => {
   }
 });
 
-router.post("/:classroomId/assignment", verify, async (req, res) => {
-  const verified = jwt.verify(
-    req.headers["auth-token"],
-    process.env.TOKEN_SECRET
-  );
+router.put("/:classroomId/assignment", verify, async (req, res) => {
+  const classroomId = req.params.classroomId;
+  console.log(classroomId);
 
-  console.log("MADE IT classroomID / Assignemnt");
+  const assignment = new Assignment({
+    classroomId: classroomId,
+    title: req.body.title,
+    description: req.body.description,
+    dueDate: req.body.dueDate,
+    isPublished: req.body.isPublished,
+    repsonses: [],
+    viewedBy: []
+  });
 
-  //data MUST be wrapped in [ ] to push to array as object
-  // var data = [];
-  // data.push(verified._id);
+  try {
+    const savedAssignment = await assignment.save();
 
-  // const classroom = new Classroom({
-  //   className: req.body.className,
-  //   createdBy: verified._id,
-  //   teachers: [data],
-  //   assignments: [],
-  //   announcements: []
-  // });
+    const updatedClassroomAssignment = await Classroom.updateOne(
+      { _id: { $eq: classroomId } },
+      {
+        $push: {
+          assignments: {
+            assignmentId: savedAssignment._id
+          }
+        }
+      }
+    );
 
-  // console.log(classroom);
-
-  // try {
-  //   const savedClassroom = await classroom.save();
-  //   res.json(savedClassroom);
-  // } catch (err) {
-  //   res.json(err);
-  // }
+    res.json(updatedClassroomAssignment);
+  } catch (err) {
+    res.json(err);
+  }
 });
 
 router.delete("/:classroomId", async (req, res) => {
