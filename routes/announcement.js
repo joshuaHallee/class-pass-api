@@ -15,6 +15,7 @@ router.get("/", async (req, res) => {
 router.put("/:classroomId", verify, async (req, res) => {
   const classroomId = req.params.classroomId;
   console.log(classroomId);
+  console.log(classroomId);
 
   const announcement = new Announcement({
     classroomId: classroomId,
