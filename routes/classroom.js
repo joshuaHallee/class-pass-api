@@ -38,39 +38,39 @@ router.post("/", verify, async (req, res) => {
   }
 });
 
-router.put("/:classroomId/assignment", verify, async (req, res) => {
-  const classroomId = req.params.classroomId;
-  console.log(classroomId);
+// router.put("/:classroomId/assignment", verify, async (req, res) => {
+//   const classroomId = req.params.classroomId;
+//   console.log(classroomId);
 
-  const assignment = new Assignment({
-    classroomId: classroomId,
-    title: req.body.title,
-    description: req.body.description,
-    dueDate: req.body.dueDate,
-    isPublished: req.body.isPublished,
-    repsonses: [],
-    viewedBy: []
-  });
+//   const assignment = new Assignment({
+//     classroomId: classroomId,
+//     title: req.body.title,
+//     description: req.body.description,
+//     dueDate: req.body.dueDate,
+//     isPublished: req.body.isPublished,
+//     repsonses: [],
+//     viewedBy: []
+//   });
 
-  try {
-    const savedAssignment = await assignment.save();
+//   try {
+//     const savedAssignment = await assignment.save();
 
-    const updatedClassroomAssignment = await Classroom.updateOne(
-      { _id: { $eq: classroomId } },
-      {
-        $push: {
-          assignments: {
-            assignmentId: savedAssignment._id
-          }
-        }
-      }
-    );
+//     const updatedClassroomAssignment = await Classroom.updateOne(
+//       { _id: { $eq: classroomId } },
+//       {
+//         $push: {
+//           assignments: {
+//             assignmentId: savedAssignment._id
+//           }
+//         }
+//       }
+//     );
 
-    res.json(updatedClassroomAssignment);
-  } catch (err) {
-    res.json(err);
-  }
-});
+//     res.json(updatedClassroomAssignment);
+//   } catch (err) {
+//     res.json(err);
+//   }
+// });
 
 router.delete("/:classroomId", async (req, res) => {
   try {
