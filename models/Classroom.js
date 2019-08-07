@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
+const shortid = require("shortid");
 //
 const classroomSchema = new mongoose.Schema({
+  inviteCode: { type: String, default: shortid.generate },
   className: { type: String, required: true },
   createdBy: { type: String, required: true },
   creationDate: { type: Date, default: Date.now },
