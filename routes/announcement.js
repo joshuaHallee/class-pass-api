@@ -3,7 +3,7 @@ const router = express.Router();
 const verify = require("./verifyToken");
 const Announcement = require("../models/Announcement");
 
-router.get("/", async (req, res) => {
+router.get("/", verify, async (req, res) => {
   try {
     const announcments = await Announcement.find();
     res.json(announcments + "returned announcement test");
