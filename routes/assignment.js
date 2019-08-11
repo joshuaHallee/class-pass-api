@@ -47,13 +47,4 @@ router.put("/:classroomId", verify, async (req, res) => {
   }
 });
 
-router.delete("/nuclear", async (req, res) => {
-  try {
-    const deletedAssignment = await Assignment.deleteMany({});
-    res.json(deletedAssignment);
-  } catch (err) {
-    res.json({ messaage: error });
-  }
-});
-
 module.exports = router;
