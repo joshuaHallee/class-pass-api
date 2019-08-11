@@ -4,7 +4,7 @@ const verify = require("./verifyToken");
 const Assignment = require("../models/Assignment");
 const Classroom = require("../models/Classroom");
 
-router.get("/", async (req, res) => {
+router.get("/", verify, async (req, res) => {
   try {
     const assignments = await Assignment.find();
     res.json(assignments);

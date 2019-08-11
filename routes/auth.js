@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { registerValidation, loginValidation } = require("../validation");
 
-router.post("/register", async (req, res) => {
+router.post("/register", verify, async (req, res) => {
   //validate
   const { error } = registerValidation(req.body);
   if (error) return res.status(400).send(error.details[0].message);
@@ -41,7 +41,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", verify, async (req, res) => {
   //validate
   const { error } = loginValidation(req.body);
   if (error) return res.status(400).send(error.details[0].message);
@@ -60,7 +60,7 @@ router.post("/login", async (req, res) => {
   res.header("auth-token", token).send(token);
 });
 
-router.get("/", async (req, res) => {
+router.get("/", verify, async (req, res) => {
   try {
     const users = await User.find();
     res.json(users);
@@ -69,7 +69,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.delete("/:userId", async (req, res) => {
+router.delete("/:userId", verify, async (req, res) => {
   try {
     const deletedUser = await User.deleteOne({ _id: req.params.userId });
     res.json(deletedUser);

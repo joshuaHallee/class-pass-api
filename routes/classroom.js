@@ -72,7 +72,7 @@ router.post("/", verify, async (req, res) => {
 //   }
 // });
 
-router.delete("/:classroomId", async (req, res) => {
+router.delete("/:classroomId", verify, async (req, res) => {
   try {
     const deletedClassroom = await Classroom.deleteOne({
       _id: req.params.classroomId
