@@ -9,7 +9,6 @@ require("dotenv/config");
 const announcementRoute = require("./routes/announcement");
 const assignmentRoute = require("./routes/assignment");
 const classroomRoute = require("./routes/classroom");
-const postRoute = require("./routes/post");
 const authRoute = require("./routes/auth");
 
 //Middleware
@@ -17,7 +16,6 @@ app.use(bodyParser.json());
 app.use("/api/announcement", announcementRoute);
 app.use("/api/assignment", assignmentRoute);
 app.use("/api/classroom", classroomRoute);
-app.use("/api/post", postRoute);
 app.use("/api/user", authRoute);
 
 //ROUTES
