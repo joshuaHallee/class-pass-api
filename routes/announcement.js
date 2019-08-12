@@ -46,4 +46,19 @@ router.put("/:classroomId", verify, async (req, res) => {
   }
 });
 
+router.delete("/:announcementId", verify, async (req, res) => {
+  try {
+    const deletedAnnouncement = await Classroom.update(
+      {},
+      {
+        $pull: { announcements: { announcementId: req.params.announcementId } }
+      },
+      { multi: true }
+    );
+    res.json(deletedAnnouncement);
+  } catch (err) {
+    res.json(err);
+  }
+});
+
 module.exports = router;
