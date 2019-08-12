@@ -2,11 +2,12 @@ const express = require("express");
 const router = express.Router();
 const verify = require("./verifyToken");
 const Announcement = require("../models/Announcement");
+const Classroom = require("../models/Classroom");
 
 router.get("/", verify, async (req, res) => {
   try {
     const announcments = await Announcement.find();
-    res.json(announcments + "returned announcement test");
+    res.json(announcments);
   } catch (err) {
     res.json({ message: error });
   }
@@ -14,7 +15,6 @@ router.get("/", verify, async (req, res) => {
 
 router.put("/:classroomId", verify, async (req, res) => {
   const classroomId = req.params.classroomId;
-  console.log(classroomId);
   console.log(classroomId);
 
   const announcement = new Announcement({
@@ -24,6 +24,8 @@ router.put("/:classroomId", verify, async (req, res) => {
     isPublished: req.body.isPublished
   });
 
+  console.log(announcement);
+
   try {
     const savedAnnouncement = await announcement.save();
 
@@ -31,7 +33,7 @@ router.put("/:classroomId", verify, async (req, res) => {
       { _id: { $eq: classroomId } },
       {
         $push: {
-          announcments: {
+          announcements: {
             announcementId: savedAnnouncement._id
           }
         }
