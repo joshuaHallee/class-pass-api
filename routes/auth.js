@@ -33,6 +33,7 @@ router.post("/register", async (req, res) => {
       isStudent: req.body.role.isStudent,
       isParent: req.body.role.isParent
     },
+    phone: req.body.phone,
     email: req.body.email,
     password: hashPassword
   });

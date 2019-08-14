@@ -21,6 +21,9 @@ const registerValidation = data => {
       .min(6)
       .required()
       .email(),
+    phone: Joi.string()
+      .min(6)
+      .required(),
     password: Joi.string()
       .min(6)
       .required()
