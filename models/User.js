@@ -13,7 +13,8 @@ const userSchema = new mongoose.Schema({
   classrooms: {
     classroomId: { type: String }
   },
-  email: { type: String, required: true },
+  email: { type: String, required: false },
+  phone: { type: String, required: true },
   password: { type: String, required: true, max: 1024 },
   creationDate: { type: Date, default: Date.now }
 });
