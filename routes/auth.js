@@ -4,6 +4,10 @@ const User = require("../models/User");
 const verify = require("./verifyToken");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const client = require("twilio")(
+  process.env.TWILIO_ACCOUT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
 const { registerValidation, loginValidation } = require("../validation");
 
 router.post("/register", async (req, res) => {
@@ -59,6 +63,24 @@ router.post("/login", async (req, res) => {
   const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
 
   res.header("auth-token", token).send(token);
+});
+
+//phone verification
+router.post("/verify-phone", (req, res) => {
+  res.header("Content-Type", "application/json");
+  client.messages
+    .create({
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: req.body.to,
+      body: req.body.body
+    })
+    .then(() => {
+      res.send(JSON.stringify({ success: true }));
+    })
+    .catch(err => {
+      console.log(err);
+      res.send(JSON.stringify({ success: false }));
+    });
 });
 
 router.get("/", verify, async (req, res) => {
