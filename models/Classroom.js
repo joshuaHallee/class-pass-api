@@ -9,6 +9,7 @@ const classroomSchema = new mongoose.Schema({
   students: [
     {
       studentId: { type: String },
+      grade: { type: Number, default: 100 },
       joinDate: { type: Date, default: Date.now }
     }
   ],
