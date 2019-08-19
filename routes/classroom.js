@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const verify = require("./verifyToken");
+const User = require("../models/User");
 const Classroom = require("../models/Classroom");
 const Assignment = require("../models/Assignment");
 
@@ -38,39 +39,73 @@ router.post("/", verify, async (req, res) => {
   }
 });
 
-// router.put("/:classroomId/assignment", verify, async (req, res) => {
-//   const classroomId = req.params.classroomId;
-//   console.log(classroomId);
+router.post("/join/:shortId", verify, async (req, res) => {
+  try {
+    //gets UserID
+    const currentlyLoggedOnUserId = jwt.verify(
+      req.headers["auth-token"],
+      process.env.TOKEN_SECRET
+    );
 
-//   const assignment = new Assignment({
-//     classroomId: classroomId,
-//     title: req.body.title,
-//     description: req.body.description,
-//     dueDate: req.body.dueDate,
-//     isPublished: req.body.isPublished,
-//     repsonses: [],
-//     viewedBy: []
-//   });
+    //gets ClassroomID from shortID
+    const targetClassroom = await Classroom.findOne({
+      inviteCode: { $eq: req.params.shortId }
+    });
+    const longClassroomId = targetClassroom._id;
 
-//   try {
-//     const savedAssignment = await assignment.save();
+    //insert StudentID into classroom students[] array
+    const studentIdToClassroom = await Classroom.updateOne(
+      { _id: { $eq: longClassroomId } },
+      {
+        $push: {
+          students: {
+            studentId: currentlyLoggedOnUserId
+          }
+        }
+      }
+    );
 
-//     const updatedClassroomAssignment = await Classroom.updateOne(
-//       { _id: { $eq: classroomId } },
-//       {
-//         $push: {
-//           assignments: {
-//             assignmentId: savedAssignment._id
-//           }
-//         }
-//       }
-//     );
+    const classroomIdToStudent = await User.updateOne(
+      { _id: { $eq: currentlyLoggedOnUserId } },
+      {
+        $push: {
+          classrooms: {
+            classroomId: longClassroomId
+          }
+        }
+      }
+    );
 
-//     res.json(updatedClassroomAssignment);
-//   } catch (err) {
-//     res.json(err);
-//   }
-// });
+    res.json(studentIdToClassroom);
+    res.json(classroomIdToStudent);
+
+    // {
+    //   "_id": "5d5091233d44a005b4425b86",
+    //   "className": "Joshs Room",
+    //   "createdBy": "5d508f4c3d44a005b4425b7d",
+    //   "teachers": [],
+    //   "assignments": [],
+    //   "announcements": [
+    //   ],
+    //   "inviteCode": "GltLSqcMB",
+    //   "creationDate": "2019-08-11T22:05:23.923Z",
+    //   "students": []
+    // }
+
+    // const updatedClassroomAssignment = await Classroom.updateOne(
+    //   { _id: { $eq: classroomId } },
+    //   {
+    //     $push: {
+    //       assignments: {
+    //         assignmentId: savedAssignment._id
+    //       }
+    //     }
+    //   }
+    // );
+  } catch (err) {
+    res.json(err);
+  }
+});
 
 router.delete("/:classroomId", verify, async (req, res) => {
   try {
