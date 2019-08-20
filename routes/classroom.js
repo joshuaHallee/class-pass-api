@@ -65,6 +65,7 @@ router.post("/join/:shortId", verify, async (req, res) => {
       }
     );
 
+    //insert classroomId into student classrooms[] array
     const classroomIdToStudent = await User.updateOne(
       { _id: { $eq: currentlyLoggedOnUserId } },
       {
@@ -75,33 +76,33 @@ router.post("/join/:shortId", verify, async (req, res) => {
         }
       }
     );
+    res.status(200).json(longClassroomId);
+  } catch (err) {
+    res.json(err);
+  }
+});
 
-    res.json(studentIdToClassroom);
-    res.json(classroomIdToStudent);
+router.get("/classrooms", verify, async (req, res) => {
+  try {
+    //gets currently signed in userID
+    const currentlyLoggedOnUserId = jwt.verify(
+      req.headers["auth-token"],
+      process.env.TOKEN_SECRET
+    );
+    //returns all userclassroom
+    const studentClassrooms = await User.find(
+      {
+        _id: currentlyLoggedOnUserId
+      },
+      { classrooms: 1 }
+    );
+    //cleaned to actual array
+    const studentClassroomArray = studentClassrooms[0].classrooms.classroomId;
 
-    // {
-    //   "_id": "5d5091233d44a005b4425b86",
-    //   "className": "Joshs Room",
-    //   "createdBy": "5d508f4c3d44a005b4425b7d",
-    //   "teachers": [],
-    //   "assignments": [],
-    //   "announcements": [
-    //   ],
-    //   "inviteCode": "GltLSqcMB",
-    //   "creationDate": "2019-08-11T22:05:23.923Z",
-    //   "students": []
-    // }
-
-    // const updatedClassroomAssignment = await Classroom.updateOne(
-    //   { _id: { $eq: classroomId } },
-    //   {
-    //     $push: {
-    //       assignments: {
-    //         assignmentId: savedAssignment._id
-    //       }
-    //     }
-    //   }
-    // );
+    const returnAllClassroomInfo = await Classroom.find({
+      _id: { $in: studentClassroomArray }
+    });
+    res.json(returnAllClassroomInfo);
   } catch (err) {
     res.json(err);
   }
