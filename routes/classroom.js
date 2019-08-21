@@ -108,6 +108,51 @@ router.get("/classrooms", verify, async (req, res) => {
   }
 });
 
+router.get("/classrooms/assignments", verify, async (req, res) => {
+  try {
+    //gets currently signed in userID
+    const currentlyLoggedOnUserId = jwt.verify(
+      req.headers["auth-token"],
+      process.env.TOKEN_SECRET
+    );
+    //returns all userclassroom
+    const studentClassrooms = await User.find(
+      {
+        _id: currentlyLoggedOnUserId
+      },
+      { classrooms: 1 }
+    );
+    //cleaned to actual array
+    const studentClassroomArray = studentClassrooms[0].classrooms.classroomId;
+
+    const classroomAssignments = await Classroom.find(
+      {
+        _id: { $in: studentClassroomArray }
+      },
+      { assignments: 1 }
+    );
+
+    var array = {};
+
+    classroomAssignments.forEach(function(element) {
+      console.log(element.assignments[0].assignmentId);
+    });
+
+    //cleaned assignments array
+    // totalNumOfAssignments = classroomAssignments.length;
+    // listOfAssignments = {};
+
+    // studentAssignmentsArray.foreach(function(element) {
+    //   listOfAssignments.push(classroomAssignments.assignmenId);
+    // });
+    //studentAssignmentsArray = classroomAssignments.length;
+
+    res.json("Work In Progress");
+  } catch (err) {
+    res.json(err);
+  }
+});
+
 router.delete("/:classroomId", verify, async (req, res) => {
   try {
     const deletedClassroom = await Classroom.deleteOne({
