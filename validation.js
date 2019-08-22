@@ -6,10 +6,10 @@ const registerValidation = data => {
   const schema = {
     name: {
       first: Joi.string()
-        .min(6)
+        .min(2)
         .required(),
       last: Joi.string()
-        .min(6)
+        .min(2)
         .required()
     },
     role: {
@@ -34,12 +34,9 @@ const registerValidation = data => {
 const loginValidation = data => {
   const schema = {
     email: Joi.string()
-      .min(6)
       .required()
       .email(),
-    password: Joi.string()
-      .min(6)
-      .required()
+    password: Joi.string().required()
   };
   return Joi.validate(data, schema);
 };
