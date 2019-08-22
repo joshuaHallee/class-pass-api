@@ -115,6 +115,7 @@ router.get("/classrooms/assignments", verify, async (req, res) => {
       req.headers["auth-token"],
       process.env.TOKEN_SECRET
     );
+
     //returns all userclassroom
     const studentClassrooms = await User.find(
       {
@@ -122,6 +123,7 @@ router.get("/classrooms/assignments", verify, async (req, res) => {
       },
       { classrooms: 1 }
     );
+
     //cleaned to actual array
     const studentClassroomArray = studentClassrooms[0].classrooms.classroomId;
 
@@ -132,22 +134,28 @@ router.get("/classrooms/assignments", verify, async (req, res) => {
       { assignments: 1 }
     );
 
-    var array = {};
+    var myArray = [];
+    var classroomLength = classroomAssignments.length;
 
-    classroomAssignments.forEach(function(element) {
-      console.log(element.assignments[0].assignmentId);
-    });
+    for (i = 0; i < classroomLength; i++) {
+      console.log(classroomAssignments[i].assignments);
+    }
 
-    //cleaned assignments array
+    //assignments[i].assignmentId
+
+    // classroomAssignments.forEach(function(element) {
+    //   myArray.push(element.assignments[0].assignmentId);
+    // });
+
+    // //cleaned assignments array
     // totalNumOfAssignments = classroomAssignments.length;
     // listOfAssignments = {};
 
     // studentAssignmentsArray.foreach(function(element) {
     //   listOfAssignments.push(classroomAssignments.assignmenId);
     // });
-    //studentAssignmentsArray = classroomAssignments.length;
 
-    res.json("Work In Progress");
+    res.json(myArray);
   } catch (err) {
     res.json(err);
   }
