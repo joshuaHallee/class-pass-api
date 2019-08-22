@@ -13,11 +13,11 @@ const { registerValidation, loginValidation } = require("../validation");
 router.post("/register", async (req, res) => {
   //validate
   const { error } = registerValidation(req.body);
-  if (error) return res.status(401).send(error.details[0].message);
+  if (error) return res.json(error.details[0].message);
 
   //check for existing email
   const emailExists = await User.findOne({ email: req.body.email });
-  if (emailExists) return res.status(401).send("Email already exists");
+  if (emailExists) return res.json({"error":"Email already exists"});
 
   //little bit of hash(browns) and salt because im hungry
   const salt = await bcrypt.genSalt(10);
@@ -39,27 +39,35 @@ router.post("/register", async (req, res) => {
   });
 
   try {
-    //res.json(req.body);
     const savedUser = await user.save();
-    res.status(200).json({ user: user._id });
-    //res.json({ user: user._id });
+   
+    //create and assign a token
+    const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET, {
+      expiresIn: "2h"
+    });
+
+    res
+      .status(200)
+      .header("auth-token", token)
+      .send(token);
+
   } catch (err) {
-    res.status(401).json(err);
+    res.json(err);
   }
 });
 
 router.post("/login", async (req, res) => {
   //validate
   const { error } = loginValidation(req.body);
-  if (error) return res.status(403).send(error.details[0].message);
+  if (error) return res.json(error.details[0].message);
 
   //check for existing email
   const user = await User.findOne({ email: req.body.email });
-  if (!user) return res.status(403).send("Email is incorrect");
+  if (!user) return res.json({ error: "Email is incorrect" });
 
   //password check
   const validPass = await bcrypt.compare(req.body.password, user.password);
-  if (!validPass) return res.status(403).send("Password is incorrect");
+  if (!validPass) return res.json({ error: "Password is incorrect" });
 
   //create and assign a token
   const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET, {
@@ -93,7 +101,7 @@ router.post("/verify-phone", (req, res) => {
 router.get("/", verify, async (req, res) => {
   try {
     const users = await User.find();
-    res.status(200).json(users);
+    res.json(users);
   } catch (err) {
     res.json(err);
   }
@@ -102,7 +110,7 @@ router.get("/", verify, async (req, res) => {
 router.delete("/:userId", verify, async (req, res) => {
   try {
     const deletedUser = await User.deleteOne({ _id: req.params.userId });
-    res.status(200).json(deletedUser);
+    res.json(deletedUser);
   } catch (err) {
     res.json(err);
   }
