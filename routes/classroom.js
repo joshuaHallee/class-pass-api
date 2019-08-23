@@ -153,25 +153,25 @@ router.get("/classrooms/assignments", verify, async (req, res) => {
     });
 
     for (i = 0; i < studentClassroomIdArray.length; i++) {
-      ultraMegaPayload[i] = [
+      ultraMegaPayload[i] = 
         {
           className: findClassroomData[i].className,
           classroomId: findClassroomData[i]._id,
           assignments: []
         }
-      ];
+      ;
       console.log("room: " + i);
       //console.log("=================" + JSON.stringify(ultraMegaPayload[i]));
       for (k = 0; k < findClassroomData[i].assignments.length; k++) {
         try {
-          console.log("asignment: " + k);
+          console.log("assignment: " + k);
           const myAssignment = await Assignment.findOne({
             _id: { _id: findClassroomData[i].assignments[k].assignmentId }
           });
 
-          //console.log(myAssignment.title);
+          console.log(myAssignment.title);
 
-          ultraMegaPayload[0][i].assignments.push({
+          ultraMegaPayload[i].assignments.push({
             title: myAssignment.title
           });
           //console.log("=======" + JSON.stringify(ultraMegaPayload[i]));
@@ -180,7 +180,7 @@ router.get("/classrooms/assignments", verify, async (req, res) => {
         }
       }
     }
-    console.log(ultraMegaPayload);
+    //console.log(ultraMegaPayload);
     // //clean
     // for (i = 0; i < studentClassroomIdArray.length; i++) {
     //   //console.log("class " + i);
@@ -226,7 +226,7 @@ router.get("/classrooms/assignments", verify, async (req, res) => {
     //===============
     //console.log(ultraMegaPayload);
 
-    res.json(megaPayload);
+    res.json(ultraMegaPayload);
   } catch (err) {
     res.json(err);
   }
