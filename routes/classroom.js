@@ -122,6 +122,9 @@ router.get("/classrooms", verify, async (req, res) => {
 router.get("/classrooms/assignments", verify, async (req, res) => {
   try {
     var megaPayload = [];
+
+    var ultraMegaPayload = [];
+
     //gets currently signed in userId
     const currentlyLoggedOnUserId = jwt.verify(
       req.headers["auth-token"],
@@ -150,13 +153,41 @@ router.get("/classrooms/assignments", verify, async (req, res) => {
       _id: { $in: assignmentArray }
     });
 
+    for (i = 0; i < studentClassroomIdArray.length; i++) {
+      ultraMegaPayload[i] = [
+        {
+          className: findClassroomData[i].className,
+          classroomId: findClassroomData[i]._id,
+          assignments: []
+        }
+      ];
+
+      console.log("=================" + JSON.stringify(ultraMegaPayload[i]));
+      for (k = 0; k < findClassroomData[i].assignments.length; k++) {
+        try {
+          const myAssignment = await Assignment.findOne({
+            _id: { _id: findClassroomData[i].assignments[k].assignmentId }
+          });
+
+          console.log(myAssignment.title);
+
+          ultraMegaPayload[i].assignments.push({ title: myAssignment.title });
+          console.log("=======" + JSON.stringify(ultraMegaPayload[i]));
+        } catch (err) {
+          console.log(err);
+        }
+      }
+    }
+
     //clean
     for (i = 0; i < studentClassroomIdArray.length; i++) {
       console.log("class " + i);
       megaPayload.push(findClassroomData[i]);
+      console.log("Class Name: " + findClassroomData[i].className);
       megaPayload[i].teachers = [];
       megaPayload[i].announcements = [];
       megaPayload[i].students = [];
+      //megaPayload[i].assignments = [];
       for (j = 0; j < findClassroomData[i].assignments.length; j++) {
         console.log("assignment " + j);
       }
@@ -181,6 +212,9 @@ router.get("/classrooms/assignments", verify, async (req, res) => {
     console.log("ASSIGNMENT DATA DUMP");
     console.log(findClassroomAssignments);
     console.log(" ");
+
+    //===============
+    console.log(ultraMegaPayload);
 
     res.json(megaPayload);
   } catch (err) {
