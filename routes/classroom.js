@@ -122,7 +122,6 @@ router.get("/classrooms", verify, async (req, res) => {
 router.get("/classrooms/assignments", verify, async (req, res) => {
   try {
     var megaPayload = [];
-
     var ultraMegaPayload = [];
 
     //gets currently signed in userId
@@ -161,60 +160,71 @@ router.get("/classrooms/assignments", verify, async (req, res) => {
           assignments: []
         }
       ];
-
-      console.log("=================" + JSON.stringify(ultraMegaPayload[i]));
+      console.log("room: " + i);
+      //console.log("=================" + JSON.stringify(ultraMegaPayload[i]));
       for (k = 0; k < findClassroomData[i].assignments.length; k++) {
         try {
+          console.log("asignment: " + k);
           const myAssignment = await Assignment.findOne({
             _id: { _id: findClassroomData[i].assignments[k].assignmentId }
           });
 
-          console.log(myAssignment.title);
+          //console.log(myAssignment.title);
 
-          ultraMegaPayload[i].assignments.push({ title: myAssignment.title });
-          console.log("=======" + JSON.stringify(ultraMegaPayload[i]));
+          ultraMegaPayload[0][i].assignments.push({
+            title: myAssignment.title
+          });
+          //console.log("=======" + JSON.stringify(ultraMegaPayload[i]));
         } catch (err) {
-          console.log(err);
+          //console.log(err);
         }
       }
     }
-
-    //clean
-    for (i = 0; i < studentClassroomIdArray.length; i++) {
-      console.log("class " + i);
-      megaPayload.push(findClassroomData[i]);
-      console.log("Class Name: " + findClassroomData[i].className);
-      megaPayload[i].teachers = [];
-      megaPayload[i].announcements = [];
-      megaPayload[i].students = [];
-      //megaPayload[i].assignments = [];
-      for (j = 0; j < findClassroomData[i].assignments.length; j++) {
-        console.log("assignment " + j);
-      }
-    }
+    console.log(ultraMegaPayload);
+    // //clean
+    // for (i = 0; i < studentClassroomIdArray.length; i++) {
+    //   //console.log("class " + i);
+    //   megaPayload.push(findClassroomData[i]);
+    //   //console.log("Class Name: " + findClassroomData[i].className);
+    //   megaPayload[i].teachers = [];
+    //   megaPayload[i].announcements = [];
+    //   megaPayload[i].students = [];
+    //   //megaPayload[i].assignments = [];
+    //   for (j = 0; j < findClassroomData[i].assignments.length; j++) {
+    //     //console.log("assignment " + j);
+    //   }
+    // }
 
     // megaPayload[0].assignments = [];
     // megaPayload[0].assignments.push("test");
 
     // Debugging
-    console.log("_________________________________________________");
-    console.log("Currently Sign in as: " + currentlyLoggedOnUserId._id);
-    console.log(" ");
-    console.log("These are my classrooms");
-    console.log(studentClassroomIdArray);
-    console.log(" ");
-    console.log("These are my assignments");
-    console.log(assignmentArray);
-    console.log(" ");
-    console.log("CLASSROOM DATA DUMP");
-    console.log(findClassroomData);
-    console.log(" ");
-    console.log("ASSIGNMENT DATA DUMP");
-    console.log(findClassroomAssignments);
-    console.log(" ");
+    // console.log("_________________________________________________");
+    // console.log("Currently Sign in as: " + currentlyLoggedOnUserId._id);
+    // console.log(" ");
+    // console.log("These are my classrooms");
+    // console.log(studentClassroomIdArray);
+    // console.log(" ");
+    // console.log("These are my assignments");
+    // console.log(assignmentArray);
+    // console.log(" ");
+    // console.log("CLASSROOM DATA DUMP");
+    // console.log(findClassroomData);
+    // console.log(" ");
+    // console.log("ASSIGNMENT DATA DUMP");
+    // console.log(findClassroomAssignments);
+    // console.log(" ");
 
+    //console.log("My Load - full");
+    //ultraMegaPayload[0][0].assignments = {test: "aaaaa"};
+    //console.log(console.log(ultraMegaPayload[0][0].assignments));
+
+    //console.log(ultraMegaPayload);
+
+    //console.log("My load - partcial");
+    //console.log(ultraMegaPayload[0][0]);
     //===============
-    console.log(ultraMegaPayload);
+    //console.log(ultraMegaPayload);
 
     res.json(megaPayload);
   } catch (err) {
