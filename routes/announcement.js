@@ -13,6 +13,17 @@ router.get("/", verify, async (req, res) => {
   }
 });
 
+router.get("/:announcementId", verify, async (req, res) => {
+  try {
+    const findAnnouncementById = await Announcement.find({
+      _id: req.params.announcementId
+    });
+    res.json(findAnnouncementById);
+  } catch (err) {
+    res.json(err);
+  }
+});
+
 router.put("/:classroomId", verify, async (req, res) => {
   const classroomId = req.params.classroomId;
   console.log(classroomId);

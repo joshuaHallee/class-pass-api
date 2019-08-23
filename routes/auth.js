@@ -17,7 +17,7 @@ router.post("/register", async (req, res) => {
 
   //check for existing email
   const emailExists = await User.findOne({ email: req.body.email });
-  if (emailExists) return res.json({"error":"Email already exists"});
+  if (emailExists) return res.json({ error: "Email already exists" });
 
   //little bit of hash(browns) and salt because im hungry
   const salt = await bcrypt.genSalt(10);
@@ -40,7 +40,7 @@ router.post("/register", async (req, res) => {
 
   try {
     const savedUser = await user.save();
-   
+
     //create and assign a token
     const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET, {
       expiresIn: "2h"
@@ -50,7 +50,6 @@ router.post("/register", async (req, res) => {
       .status(200)
       .header("auth-token", token)
       .send(token);
-
   } catch (err) {
     res.json(err);
   }
@@ -102,6 +101,17 @@ router.get("/", verify, async (req, res) => {
   try {
     const users = await User.find();
     res.json(users);
+  } catch (err) {
+    res.json(err);
+  }
+});
+
+router.get("/:userId", verify, async (req, res) => {
+  try {
+    const findUserById = await User.find({
+      _id: req.params.userId
+    });
+    res.json(findUserById);
   } catch (err) {
     res.json(err);
   }

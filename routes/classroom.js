@@ -82,6 +82,17 @@ router.post("/join/:shortId", verify, async (req, res) => {
   }
 });
 
+router.get("/:classroomId", verify, async (req, res) => {
+  try {
+    const findClassroomById = await Classroom.find({
+      _id: req.params.classroomId
+    });
+    res.json(findClassroomById);
+  } catch (err) {
+    res.json(err);
+  }
+});
+
 router.get("/classrooms", verify, async (req, res) => {
   try {
     //gets currently signed in userID
@@ -110,52 +121,68 @@ router.get("/classrooms", verify, async (req, res) => {
 
 router.get("/classrooms/assignments", verify, async (req, res) => {
   try {
-    //gets currently signed in userID
+    var megaPayload = [];
+    //gets currently signed in userId
     const currentlyLoggedOnUserId = jwt.verify(
       req.headers["auth-token"],
       process.env.TOKEN_SECRET
     );
-
-    //returns all userclassroom
-    const studentClassrooms = await User.find(
-      {
-        _id: currentlyLoggedOnUserId
-      },
+    //just classroom Ids
+    const studentClassroomsId = await User.find(
+      { _id: currentlyLoggedOnUserId },
       { classrooms: 1 }
     );
+    //classroom array parse
+    studentClassroomIdArray = studentClassroomsId[0].classrooms.classroomId;
+    //HARD DATA classrooms
+    const findClassroomData = await Classroom.find({
+      _id: { $in: studentClassroomIdArray }
+    });
+    //assignment array
+    assignmentArray = [];
+    for (i = 0; i < studentClassroomIdArray.length; i++) {
+      for (j = 0; j < findClassroomData[i].assignments.length; j++) {
+        assignmentArray.push(findClassroomData[i].assignments[j].assignmentId);
+      }
+    }
+    //HARD DATA assignments
+    const findClassroomAssignments = await Assignment.find({
+      _id: { $in: assignmentArray }
+    });
 
-    //cleaned to actual array
-    const studentClassroomArray = studentClassrooms[0].classrooms.classroomId;
-
-    const classroomAssignments = await Classroom.find(
-      {
-        _id: { $in: studentClassroomArray }
-      },
-      { assignments: 1 }
-    );
-
-    var myArray = [];
-    var classroomLength = classroomAssignments.length;
-
-    for (i = 0; i < classroomLength; i++) {
-      console.log(classroomAssignments[i].assignments);
+    //clean
+    for (i = 0; i < studentClassroomIdArray.length; i++) {
+      console.log("class " + i);
+      megaPayload.push(findClassroomData[i]);
+      megaPayload[i].teachers = [];
+      megaPayload[i].announcements = [];
+      megaPayload[i].students = [];
+      for (j = 0; j < findClassroomData[i].assignments.length; j++) {
+        console.log("assignment " + j);
+      }
     }
 
-    //assignments[i].assignmentId
+    // megaPayload[0].assignments = [];
+    // megaPayload[0].assignments.push("test");
 
-    // classroomAssignments.forEach(function(element) {
-    //   myArray.push(element.assignments[0].assignmentId);
-    // });
+    // Debugging
+    console.log("_________________________________________________");
+    console.log("Currently Sign in as: " + currentlyLoggedOnUserId._id);
+    console.log(" ");
+    console.log("These are my classrooms");
+    console.log(studentClassroomIdArray);
+    console.log(" ");
+    console.log("These are my assignments");
+    console.log(assignmentArray);
+    console.log(" ");
+    console.log("CLASSROOM DATA DUMP");
+    console.log(findClassroomData);
+    console.log(" ");
+    console.log("ASSIGNMENT DATA DUMP");
+    console.log(findClassroomAssignments);
+    console.log(" ");
 
-    // //cleaned assignments array
-    // totalNumOfAssignments = classroomAssignments.length;
-    // listOfAssignments = {};
-
-    // studentAssignmentsArray.foreach(function(element) {
-    //   listOfAssignments.push(classroomAssignments.assignmenId);
-    // });
-
-    res.json(myArray);
+    res.json(megaPayload);
   } catch (err) {
     res.json(err);
   }
