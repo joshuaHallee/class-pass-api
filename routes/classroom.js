@@ -135,13 +135,13 @@ router.get("/perStudent/assignments", verify, async (req, res) => {
       { classrooms: 1 }
     );
     //classroom array parse
-    studentClassroomIdArray = studentClassroomsId[0].classrooms.classroomId;
+    let studentClassroomIdArray = studentClassroomsId[0].classrooms.classroomId;
     //HARD DATA classrooms
     const findClassroomData = await Classroom.find({
       _id: { $in: studentClassroomIdArray }
     });
     //assignment array
-    assignmentArray = [];
+    let assignmentArray = [];
     for (i = 0; i < studentClassroomIdArray.length; i++) {
       for (j = 0; j < findClassroomData[i].assignments.length; j++) {
         assignmentArray.push(findClassroomData[i].assignments[j].assignmentId);
@@ -152,7 +152,7 @@ router.get("/perStudent/assignments", verify, async (req, res) => {
       _id: { $in: assignmentArray }
     });
 
-    var count = 0;
+    let count = 0;
     for (i = 0; i < studentClassroomIdArray.length; i++) {
       console.log("room: " + i);
       //console.log("=================" + JSON.stringify(ultraMegaPayload[i]));
@@ -164,59 +164,18 @@ router.get("/perStudent/assignments", verify, async (req, res) => {
             classroomId: findClassroomData[i]._id,
             assignments: []
           };
+
           count++;
-          // const myAssignment = await Assignment.findOne({
-          //   _id: { _id: findClassroomData[i].assignments[k].assignmentId }
-          // });
-
-          // // // console.log(myAssignment.title);
-
-          // ultraMegaPayload[i].assignments.push({
-          //   title: myAssignment.title
-          // });
-          //console.log("=======" + JSON.stringify(ultraMegaPayload[i]));
+          const myAssignment = await Assignment.findOne({
+            _id: { _id: findClassroomData[i].assignments[k].assignmentId }
+          });
+          ultraMegaPayload[i].assignments.push(myAssignment);
         } catch (err) {
           console.log(err);
         }
       }
     }
-
-    //console.log(ultraMegaPayload);
-    // //clean
-    // for (i = 0; i < studentClassroomIdArray.length; i++) {
-    //   //console.log("class " + i);
-    //   megaPayload.push(findClassroomData[i]);
-    //   //console.log("Class Name: " + findClassroomData[i].className);
-    //   megaPayload[i].teachers = [];
-    //   megaPayload[i].announcements = [];
-    //   megaPayload[i].students = [];
-    //   //megaPayload[i].assignments = [];
-    //   for (j = 0; j < findClassroomData[i].assignments.length; j++) {
-    //     //console.log("assignment " + j);
-    //   }
-    // }
-
-    // megaPayload[0].assignments = [];
-    // megaPayload[0].assignments.push("test");
-
-    // Debugging
-    // console.log("_________________________________________________");
-    // console.log("Currently Sign in as: " + currentlyLoggedOnUserId._id);
-    // console.log(" ");
-    // console.log("These are my classrooms");
-    // console.log(studentClassroomIdArray);
-    // console.log(" ");
-    // console.log("These are my assignments");
-    // console.log(assignmentArray);
-    // console.log(" ");
-    // console.log("CLASSROOM DATA DUMP");
-    // console.log(findClassroomData);
-    // console.log(" ");
-    // console.log("ASSIGNMENT DATA DUMP");
-    // console.log(findClassroomAssignments);
-    // console.log(" ");
-
-    res.json(ultraMegaPayload);
+    res.json(ultraMegaPayload)
   } catch (err) {
     res.json(err);
   }
