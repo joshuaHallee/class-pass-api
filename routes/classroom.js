@@ -5,6 +5,7 @@ const verify = require("./verifyToken");
 const User = require("../models/User");
 const Classroom = require("../models/Classroom");
 const Assignment = require("../models/Assignment");
+const Announcement = require("../models/Announcement");
 
 router.get("/", verify, async (req, res) => {
   try {
@@ -84,10 +85,56 @@ router.post("/join/:shortId", verify, async (req, res) => {
 
 router.get("/:classroomId", verify, async (req, res) => {
   try {
-    const findClassroomById = await Classroom.find({
+    //gets currently signed in userId
+    const currentlyLoggedOnUserId = jwt.verify(
+        req.headers["auth-token"],
+        process.env.TOKEN_SECRET
+    );
+    //just classroom Ids
+    const studentClassroomsId = await User.find(
+        { _id: currentlyLoggedOnUserId },
+        { classrooms: 1 }
+    );
+    //classroom array parse
+    let studentClassroomIdArray = studentClassroomsId[0].classrooms.classroomId;
+    //HARD DATA classrooms
+    const findClassroomData = await Classroom.findOne({
       _id: req.params.classroomId
     });
-    res.json(findClassroomById);
+
+    let ultraMegaPayload = {
+      className: findClassroomData.className,
+      classroomId: req.params.classroomId,
+      assignments: [],
+      announcements: []
+    };
+
+    for (k = 0; k < findClassroomData.assignments.length; k++) {
+      try {
+        console.log("assignment: " + k);
+
+        const myAssignment = await Assignment.findOne({
+          _id: { _id: findClassroomData.assignments[k].assignmentId }
+        });
+        ultraMegaPayload.assignments.push(myAssignment);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    for (k = 0; k < findClassroomData.announcements.length; k++) {
+      try {
+        console.log("announcement: " + k);
+
+        const myAnnouncement = await Announcement.findOne({
+          _id: { _id: findClassroomData.announcements[k].announcementId }
+        });
+        ultraMegaPayload.announcements.push(myAnnouncement);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    console.log(ultraMegaPayload);
+    res.json(ultraMegaPayload)
   } catch (err) {
     res.json(err);
   }
@@ -175,7 +222,75 @@ router.get("/perStudent/assignments", verify, async (req, res) => {
         }
       }
     }
-    res.json(ultraMegaPayload)
+    let assignmentsReturned = [];
+    ultraMegaPayload.forEach(cl => {
+      cl.assignments.forEach(as => {
+        assignmentsReturned.push({
+          className: cl.className,
+          ...as
+        });
+      });
+    });
+    res.json(assignmentsReturned)
+  } catch (err) {
+    res.json(err);
+  }
+});
+
+router.get("/perStudent/announcements", verify, async (req, res) => {
+  try {
+    var ultraMegaPayload = [];
+
+    //gets currently signed in userId
+    const currentlyLoggedOnUserId = jwt.verify(
+        req.headers["auth-token"],
+        process.env.TOKEN_SECRET
+    );
+    //just classroom Ids
+    const studentClassroomsId = await User.find(
+        { _id: currentlyLoggedOnUserId },
+        { classrooms: 1 }
+    );
+    //classroom array parse
+    let studentClassroomIdArray = studentClassroomsId[0].classrooms.classroomId;
+    //HARD DATA classrooms
+    const findClassroomData = await Classroom.find({
+      _id: { $in: studentClassroomIdArray }
+    });
+
+    let count = 0;
+    for (i = 0; i < studentClassroomIdArray.length; i++) {
+      //console.log("=================" + JSON.stringify(ultraMegaPayload[i]));
+      for (k = 0; k < findClassroomData[i].announcements.length; k++) {
+        try {
+          ultraMegaPayload[count] = {
+            className: findClassroomData[i].className,
+            classroomId: findClassroomData[i]._id,
+            announcements: []
+          };
+
+
+          const myAnnouncement = await Announcement.findOne({
+            _id: { _id: findClassroomData[i].announcements[k].announcementId }
+          });
+          ultraMegaPayload[count].announcements.push(myAnnouncement);
+          count++;
+        } catch (err) {
+          console.log(err);
+        }
+      }
+    }
+    let announcementsReturned = [];
+    ultraMegaPayload.forEach(cl => {
+
+      cl.announcements.forEach(as => {
+        announcementsReturned.push({
+          className: cl.className,
+          ...as._doc
+        });
+      });
+    });
+    res.json(announcementsReturned)
   } catch (err) {
     res.json(err);
   }

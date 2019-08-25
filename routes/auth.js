@@ -117,6 +117,24 @@ router.get("/:userId", verify, async (req, res) => {
   }
 });
 
+router.put("/:userId", verify, async (req, res) => {
+  const userId = req.params.userId;
+
+  let mods = {
+    name: {
+      first: req.body.name.first,
+      last: req.body.name.last
+    },
+    phone: req.body.phone,
+    email: req.body.email
+  };
+
+  User.update({_id: userId}, mods, (errors, raw) => {
+    if(errors) console.log(errors);
+    else res.json(raw);
+  })
+});
+
 router.delete("/:userId", verify, async (req, res) => {
   try {
     const deletedUser = await User.deleteOne({ _id: req.params.userId });

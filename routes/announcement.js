@@ -24,7 +24,24 @@ router.get("/:announcementId", verify, async (req, res) => {
   }
 });
 
-router.put("/:classroomId", verify, async (req, res) => {
+router.put("/:announcementId", verify, async (req, res) => {
+  const announcementId = req.params.announcementId;
+  const dateNow = new Date().getDate();
+  let mods = {
+    title: req.body.title,
+    description: req.body.description,
+    isPublished: req.body.isPublished,
+    modifiedDate: Date.now(),
+    isEdited: true
+  };
+
+  Announcement.update({_id: announcementId}, mods, (errors, raw) => {
+    if(errors) console.log(errors);
+    else res.json(raw);
+  })
+});
+
+router.post("/:classroomId", verify, async (req, res) => {
   const classroomId = req.params.classroomId;
   console.log(classroomId);
 
@@ -34,8 +51,6 @@ router.put("/:classroomId", verify, async (req, res) => {
     description: req.body.description,
     isPublished: req.body.isPublished
   });
-
-  console.log(announcement);
 
   try {
     const savedAnnouncement = await announcement.save();

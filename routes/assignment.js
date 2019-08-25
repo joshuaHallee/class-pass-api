@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const verify = require("./verifyToken");
+const jwt = require("jsonwebtoken");
 const Assignment = require("../models/Assignment");
 const Classroom = require("../models/Classroom");
 
@@ -24,18 +25,28 @@ router.get("/:assignmentId", verify, async (req, res) => {
   }
 });
 
-router.put("/:classroomId", verify, async (req, res) => {
+router.put("/do/:assignmentId/", verify, async (req, res) => {
+  const assignmentId = req.params.assignmentId
+      , currentlyLoggedOnUserId = jwt.verify(req.headers["auth-token"], process.env.TOKEN_SECRET);
+
+  let response = {
+    studentId: currentlyLoggedOnUserId,
+    submissionText: req.body.submissionText
+  }
+
+  Assignment.update({_id: assignmentId}, {$push: {responses: response}}, (errors, raw) => {
+    if(errors) console.log(errors);
+    else res.json(raw);
+  })
+});
+
+router.post("/:classroomId", verify, async (req, res) => {
   const classroomId = req.params.classroomId;
   console.log(classroomId);
 
   const assignment = new Assignment({
     classroomId: classroomId,
-    title: req.body.title,
-    description: req.body.description,
-    dueDate: req.body.dueDate,
-    isPublished: req.body.isPublished,
-    repsonses: [],
-    viewedBy: []
+    responses: []
   });
 
   try {
