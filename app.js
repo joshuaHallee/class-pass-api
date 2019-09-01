@@ -18,6 +18,8 @@ app.use("/api/assignment", assignmentRoute);
 app.use("/api/classroom", classroomRoute);
 app.use("/api/user", authRoute);
 
+mongoose.Promise = Promise;
+
 //ROUTES
 app.get("/", (req, res) => {
   res.send("good");
