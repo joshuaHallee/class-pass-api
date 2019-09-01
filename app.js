@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const app = express();
-const port = 3001;
+const port = 3000;
 require("dotenv/config");
 
 //Import Routes
@@ -26,7 +26,7 @@ app.get("/", (req, res) => {
 });
 
 //Connect to DB
-mongoose.connect(process.env.DB_CONNECTION_PROD, { useNewUrlParser: true }, () => {
+mongoose.connect(process.env.DB_CONNECTION, { useNewUrlParser: true }, () => {
   console.log("Connected to db");
 });
 
