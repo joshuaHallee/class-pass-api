@@ -363,65 +363,7 @@ router.get("/perStudent/announcements", verify, (req, res) => {
   }
 });
 
-// router.get("/perStudent/announcements", verify, (req, res) => {
-//   function returnPayload(cp) {
-//     let announcementsReturned = [];
-//     cp.forEach(cl => {
-//         cl.announcements.forEach(as => {
-//           announcementsReturned.push({
-//             className: cl.className,
-//             ...as._doc
-//           });
-//         });
-//       });
-//     res.json(announcementsReturned);
-//   }
-//   try {
-//     let classroomsPayload = [];
-//     //gets currently signed in userId
-//     const currentlyLoggedOnUserId = jwt.verify(
-//         req.headers["auth-token"],
-//         process.env.TOKEN_SECRET
-//     );
-//     //just classroom Ids
-//     User.findOne({ _id: currentlyLoggedOnUserId }, { classrooms: 1 }, (err, user) => {
-//       if(err) res.json(err);
-//       else{
-//         let classroomIds = user.classrooms.classroomId;
-//         Classroom.find({_id: { $in: classroomIds }}, (err2, classrooms) => {
-//           if(err2) res.json(err2);
-//           else{
-//             let classroomsRaw = [...classrooms];
-//             let iterations = 0;
-//             classroomsRaw.forEach((cl, clI, arr) => {
-//               classroomsPayload.push({
-//                 className: cl.className,
-//                 classroomId: cl._id,
-//                 announcements: []
-//               });
-//               let annIds = cl.announcements.map(a => a.announcementId);
-//               Announcement.find({_id: { $in: annIds}}, (err3, an) => {
-//                 if(err3) res.json(err3);
-//                 else{
-//                   iterations++;
-//                   classroomsPayload[clI].announcements = [...an];
-//                   if((arr.length - 1) === clI){
-//                     console.log('yah!', clI, arr.length)
-//                     returnPayload(classroomsPayload);
-//                   }else{
-//                     console.log('nah?', clI, arr.length)
-//                   }
-//                 }
-//               });
-//             });
-//           }
-//         })
-//       }
-//     })
-//   } catch (err) {
-//     res.json(err);
-//   }
-// });
+
 
 router.delete("/:classroomId", verify, async (req, res) => {
   try {
