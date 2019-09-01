@@ -117,6 +117,40 @@ router.get("/:userId", verify, async (req, res) => {
   }
 });
 
+router.put("/:userId", verify, async (req, res) => {
+  const userId = req.params.userId;
+
+  let mods = {
+    // name: {
+    //   first: req.body.name.first,
+    //   last: req.body.name.last
+    // },
+    // phone: req.body.phone,
+    // email: req.body.email
+  };
+  Object.keys(req.body).forEach((key, index) => {
+    console.log(key);
+    if(req.body[key] !== null && req.body[key] !== undefined && req.body[key] !== ''){
+      if(key === "name"){
+        if(req.body.name.first !== null && req.body.name.first !== undefined && req.body.name.first !== ''){
+          mods.name = {first: req.body.name.first};
+        }else{
+          mods.name = {};
+        }
+        if(req.body.name.last !== null && req.body.name.last !== undefined && req.body.name.last !== '') {
+          mods.name.last = req.body.name.last;
+        }
+      }else {
+        mods[key] = req.body[key];
+      }
+    }
+  });
+  User.update({_id: userId}, mods, (errors, raw) => {
+    if(errors) console.log(errors);
+    else res.json(raw);
+  })
+});
+
 router.delete("/:userId", verify, async (req, res) => {
   try {
     const deletedUser = await User.deleteOne({ _id: req.params.userId });

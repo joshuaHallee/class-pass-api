@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const app = express();
-const port = 3000;
+const port = 3001;
 require("dotenv/config");
 
 //Import Routes
@@ -17,6 +17,8 @@ app.use("/api/announcement", announcementRoute);
 app.use("/api/assignment", assignmentRoute);
 app.use("/api/classroom", classroomRoute);
 app.use("/api/user", authRoute);
+
+mongoose.Promise = Promise;
 
 //ROUTES
 app.get("/", (req, res) => {
