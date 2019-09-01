@@ -31,6 +31,17 @@ router.post("/", verify, async (req, res) => {
     announcements: []
   });
 
+  const classroomIdToStudent = await User.updateOne(
+    { _id: { $eq: currentlyLoggedOnUserId } },
+    {
+      $push: {
+        classrooms: {
+          classroomId: classroom._id
+        }
+      }
+    }
+  );
+
   try {
     const savedClassroom = await classroom.save();
     res.json(savedClassroom);
@@ -175,7 +186,7 @@ router.get("/perStudent/assignments", verify, async (req, res) => {
         }
       }
     }
-    res.json(ultraMegaPayload)
+    res.json(ultraMegaPayload);
   } catch (err) {
     res.json(err);
   }
