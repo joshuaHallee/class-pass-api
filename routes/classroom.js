@@ -33,6 +33,17 @@ router.post("/", verify, async (req, res) => {
     announcements: []
   });
 
+  const classroomIdToStudent = await User.updateOne(
+    { _id: { $eq: currentlyLoggedOnUserId } },
+    {
+      $push: {
+        classrooms: {
+          classroomId: classroom._id
+        }
+      }
+    }
+  );
+
   try {
     const savedClassroom = await classroom.save();
     res.json(savedClassroom);
