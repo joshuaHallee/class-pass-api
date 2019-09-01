@@ -6,6 +6,7 @@ const User = require("../models/User");
 const Classroom = require("../models/Classroom");
 const Assignment = require("../models/Assignment");
 const Announcement = require("../models/Announcement");
+const async = require('async');
 
 router.get("/", verify, async (req, res) => {
   try {
@@ -31,6 +32,17 @@ router.post("/", verify, async (req, res) => {
     assignments: [],
     announcements: []
   });
+
+  const classroomIdToStudent = await User.updateOne(
+    { _id: { $eq: currentlyLoggedOnUserId } },
+    {
+      $push: {
+        classrooms: {
+          classroomId: classroom._id
+        }
+      }
+    }
+  );
 
   try {
     const savedClassroom = await classroom.save();
@@ -167,134 +179,217 @@ router.get("/perStudent/classrooms", verify, async (req, res) => {
   }
 });
 
-router.get("/perStudent/assignments", verify, async (req, res) => {
+
+
+router.get("/perStudent/assignments", verify, (req, res) => {
   try {
-    var ultraMegaPayload = [];
-
-    //gets currently signed in userId
-    const currentlyLoggedOnUserId = jwt.verify(
-      req.headers["auth-token"],
-      process.env.TOKEN_SECRET
-    );
-    //just classroom Ids
-    const studentClassroomsId = await User.find(
-      { _id: currentlyLoggedOnUserId },
-      { classrooms: 1 }
-    );
-    //classroom array parse
-    let studentClassroomIdArray = studentClassroomsId[0].classrooms.classroomId;
-    //HARD DATA classrooms
-    const findClassroomData = await Classroom.find({
-      _id: { $in: studentClassroomIdArray }
-    });
-    //assignment array
-    let assignmentArray = [];
-    for (i = 0; i < studentClassroomIdArray.length; i++) {
-      for (j = 0; j < findClassroomData[i].assignments.length; j++) {
-        assignmentArray.push(findClassroomData[i].assignments[j].assignmentId);
-      }
-    }
-    //HARD DATA assignments
-    const findClassroomAssignments = await Assignment.find({
-      _id: { $in: assignmentArray }
-    });
-
-    let count = 0;
-    for (i = 0; i < studentClassroomIdArray.length; i++) {
-      console.log("room: " + i);
-      //console.log("=================" + JSON.stringify(ultraMegaPayload[i]));
-      for (k = 0; k < findClassroomData[i].assignments.length; k++) {
-        try {
-          console.log("assignment: " + k);
-          ultraMegaPayload[count] = {
-            className: findClassroomData[i].className,
-            classroomId: findClassroomData[i]._id,
-            assignments: []
-          };
-
-          count++;
-          const myAssignment = await Assignment.findOne({
-            _id: { _id: findClassroomData[i].assignments[k].assignmentId }
-          });
-          ultraMegaPayload[i].assignments.push(myAssignment);
-        } catch (err) {
-          console.log(err);
-        }
-      }
-    }
-    let assignmentsReturned = [];
-    ultraMegaPayload.forEach(cl => {
-      cl.assignments.forEach(as => {
-        assignmentsReturned.push({
-          className: cl.className,
-          ...as
-        });
-      });
-    });
-    res.json(assignmentsReturned)
-  } catch (err) {
-    res.json(err);
-  }
-});
-
-router.get("/perStudent/announcements", verify, async (req, res) => {
-  try {
-    var ultraMegaPayload = [];
-
+    let classroomsPayload = [];
+    let classPay = [];
     //gets currently signed in userId
     const currentlyLoggedOnUserId = jwt.verify(
         req.headers["auth-token"],
         process.env.TOKEN_SECRET
     );
-    //just classroom Ids
-    const studentClassroomsId = await User.find(
-        { _id: currentlyLoggedOnUserId },
-        { classrooms: 1 }
-    );
-    //classroom array parse
-    let studentClassroomIdArray = studentClassroomsId[0].classrooms.classroomId;
-    //HARD DATA classrooms
-    const findClassroomData = await Classroom.find({
-      _id: { $in: studentClassroomIdArray }
-    });
-
-    let count = 0;
-    for (i = 0; i < studentClassroomIdArray.length; i++) {
-      //console.log("=================" + JSON.stringify(ultraMegaPayload[i]));
-      for (k = 0; k < findClassroomData[i].announcements.length; k++) {
-        try {
-          ultraMegaPayload[count] = {
-            className: findClassroomData[i].className,
-            classroomId: findClassroomData[i]._id,
-            announcements: []
-          };
-
-
-          const myAnnouncement = await Announcement.findOne({
-            _id: { _id: findClassroomData[i].announcements[k].announcementId }
-          });
-          ultraMegaPayload[count].announcements.push(myAnnouncement);
-          count++;
-        } catch (err) {
-          console.log(err);
-        }
-      }
-    }
-    let announcementsReturned = [];
-    ultraMegaPayload.forEach(cl => {
-
-      cl.announcements.forEach(as => {
-        announcementsReturned.push({
-          className: cl.className,
-          ...as._doc
+    async.waterfall([
+      (callback) => {
+        User.findOne({ _id: currentlyLoggedOnUserId }, { classrooms: 1 }, (err, user) => {
+          if(err) res.json(err);
+          else{
+            let classroomIds = user.classrooms.classroomId;
+            callback(null, classroomIds);
+          }
         });
-      });
-    });
-    res.json(announcementsReturned)
+      },
+      (classroomIds, callback) => {
+        Classroom.find({_id: { $in: classroomIds }}, (err, classrooms) => {
+          if (err) res.json(err);
+          else {
+            let classroomsRaw = [...classrooms];
+            classroomsRaw.forEach((cl, clI, arr) => {
+              let assIds = cl.assignments.map(a => a.assignmentId);
+              classroomsPayload.push({
+                className: cl.className,
+                classroomId: cl._id,
+                assignments: [],
+                assignmentIds: [...assIds]
+              });
+            });
+            callback(null);
+          }
+        });
+      },
+      (callback) => {
+        async.forEachOf(classroomsPayload, (classroom, key, callback) => {
+          Assignment.find({_id: { $in: classroom.assignmentIds}}, (err, asses) => {
+            if (err) callback(err);
+            else {
+              let classroomStore = {...classroom};
+              classroomStore.assignments = [...asses];
+              classPay.push(classroomStore);
+              callback();
+            }
+          });
+        }, (err) => {
+          if(err) callback(err);
+          else{
+            callback(null, classPay);
+          }
+        })
+      }
+    ], (error, classPay) => {
+      if(error) res.json(error);
+      else{
+        let assignmentsReturned = [];
+        classPay.forEach(cl => {
+          cl.assignments.forEach(as => {
+            assignmentsReturned.push({
+              className: cl.className,
+              ...as._doc
+            });
+          });
+        });
+        res.json(assignmentsReturned);
+      }
+    })
   } catch (err) {
     res.json(err);
   }
 });
+
+router.get("/perStudent/announcements", verify, (req, res) => {
+  try {
+    let classroomsPayload = [];
+    let classPay = [];
+    //gets currently signed in userId
+    const currentlyLoggedOnUserId = jwt.verify(
+        req.headers["auth-token"],
+        process.env.TOKEN_SECRET
+    );
+    async.waterfall([
+      (callback) => {
+        User.findOne({ _id: currentlyLoggedOnUserId }, { classrooms: 1 }, (err, user) => {
+          if(err) res.json(err);
+          else{
+            let classroomIds = user.classrooms.classroomId;
+            callback(null, classroomIds);
+          }
+        });
+      },
+      (classroomIds, callback) => {
+        Classroom.find({_id: { $in: classroomIds }}, (err, classrooms) => {
+          if (err) res.json(err);
+          else {
+            let classroomsRaw = [...classrooms];
+            classroomsRaw.forEach((cl, clI, arr) => {
+              let assIds = cl.announcements.map(a => a.announcementId);
+              classroomsPayload.push({
+                className: cl.className,
+                classroomId: cl._id,
+                announcements: [],
+                announcementIds: [...assIds]
+              });
+            });
+            callback(null);
+          }
+        });
+      },
+      (callback) => {
+        async.forEachOf(classroomsPayload, (classroom, key, callback) => {
+          Announcement.find({_id: { $in: classroom.announcementIds}}, (err, asses) => {
+            if (err) callback(err);
+            else {
+              let classroomStore = {...classroom};
+              classroomStore.announcements = [...asses];
+              classPay.push(classroomStore);
+              callback();
+            }
+          });
+        }, (err) => {
+          if(err) callback(err);
+          else{
+            callback(null, classPay);
+          }
+        })
+      }
+    ], (error, classPay) => {
+      if(error) res.json(error);
+      else{
+        let announcementsReturned = [];
+        classPay.forEach(cl => {
+            cl.announcements.forEach(as => {
+              announcementsReturned.push({
+                className: cl.className,
+                ...as._doc
+              });
+            });
+          });
+        res.json(announcementsReturned);
+      }
+    })
+  } catch (err) {
+    res.json(err);
+  }
+});
+
+// router.get("/perStudent/announcements", verify, (req, res) => {
+//   function returnPayload(cp) {
+//     let announcementsReturned = [];
+//     cp.forEach(cl => {
+//         cl.announcements.forEach(as => {
+//           announcementsReturned.push({
+//             className: cl.className,
+//             ...as._doc
+//           });
+//         });
+//       });
+//     res.json(announcementsReturned);
+//   }
+//   try {
+//     let classroomsPayload = [];
+//     //gets currently signed in userId
+//     const currentlyLoggedOnUserId = jwt.verify(
+//         req.headers["auth-token"],
+//         process.env.TOKEN_SECRET
+//     );
+//     //just classroom Ids
+//     User.findOne({ _id: currentlyLoggedOnUserId }, { classrooms: 1 }, (err, user) => {
+//       if(err) res.json(err);
+//       else{
+//         let classroomIds = user.classrooms.classroomId;
+//         Classroom.find({_id: { $in: classroomIds }}, (err2, classrooms) => {
+//           if(err2) res.json(err2);
+//           else{
+//             let classroomsRaw = [...classrooms];
+//             let iterations = 0;
+//             classroomsRaw.forEach((cl, clI, arr) => {
+//               classroomsPayload.push({
+//                 className: cl.className,
+//                 classroomId: cl._id,
+//                 announcements: []
+//               });
+//               let annIds = cl.announcements.map(a => a.announcementId);
+//               Announcement.find({_id: { $in: annIds}}, (err3, an) => {
+//                 if(err3) res.json(err3);
+//                 else{
+//                   iterations++;
+//                   classroomsPayload[clI].announcements = [...an];
+//                   if((arr.length - 1) === clI){
+//                     console.log('yah!', clI, arr.length)
+//                     returnPayload(classroomsPayload);
+//                   }else{
+//                     console.log('nah?', clI, arr.length)
+//                   }
+//                 }
+//               });
+//             });
+//           }
+//         })
+//       }
+//     })
+//   } catch (err) {
+//     res.json(err);
+//   }
+// });
 
 router.delete("/:classroomId", verify, async (req, res) => {
   try {
