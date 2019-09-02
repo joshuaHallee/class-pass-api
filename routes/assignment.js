@@ -14,12 +14,42 @@ router.get("/", verify, async (req, res) => {
   }
 });
 
+router.get("/response/:responseId", verify, async (req, res) => {
+  try {
+    const findAssignmentResponseById = await Assignment.findOne({
+      _id: { $in: { $eq: req.params.responseId } }
+    });
+    res.json(findAssignmentResponseById);
+  } catch (err) {
+    res.json(err);
+  }
+});
+
 router.get("/:assignmentId", verify, async (req, res) => {
   try {
     const findAssignmentById = await Assignment.find({
       _id: req.params.assignmentId
     });
     res.json(findAssignmentById);
+  } catch (err) {
+    res.json(err);
+  }
+});
+
+router.patch("/:assignmentId", verify, async (req, res) => {
+  const assignmentId = req.params.assignmentId;
+  const title = req.body.title;
+  const description = req.body.description;
+
+  try {
+    const updatedClassroomAssignment = await Assignment.updateOne(
+      { _id: { $eq: assignmentId } },
+      {
+        title: title,
+        description: description
+      }
+    );
+    res.json(updatedClassroomAssignment);
   } catch (err) {
     res.json(err);
   }

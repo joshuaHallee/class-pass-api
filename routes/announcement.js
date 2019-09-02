@@ -15,10 +15,29 @@ router.get("/", verify, async (req, res) => {
 
 router.get("/:announcementId", verify, async (req, res) => {
   try {
-    const findAnnouncementById = await Announcement.find({
+    const findAnnouncementById = await Announcement.findOne({
       _id: req.params.announcementId
     });
     res.json(findAnnouncementById);
+  } catch (err) {
+    res.json(err);
+  }
+});
+
+router.patch("/:announcementId", verify, async (req, res) => {
+  const announcementId = req.params.announcementId;
+  const title = req.body.title;
+  const description = req.body.description;
+
+  try {
+    const updatedClassroomAnnouncement = await Announcement.updateOne(
+      { _id: { $eq: announcementId } },
+      {
+        title: title,
+        description: description
+      }
+    );
+    res.json(updatedClassroomAnnouncement);
   } catch (err) {
     res.json(err);
   }
@@ -35,10 +54,10 @@ router.put("/:announcementId", verify, async (req, res) => {
     isEdited: true
   };
 
-  Announcement.update({_id: announcementId}, mods, (errors, raw) => {
-    if(errors) console.log(errors);
+  Announcement.update({ _id: announcementId }, mods, (errors, raw) => {
+    if (errors) console.log(errors);
     else res.json(raw);
-  })
+  });
 });
 
 router.post("/:classroomId", verify, async (req, res) => {
