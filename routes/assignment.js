@@ -82,33 +82,81 @@ router.post("/:classroomId", verify, async (req, res) => {
 router.put("/grade/:assignmentId/for/:studentId", verify, async (req, res) => {
   const studentId = req.params.studentId;
   const assignmentId = req.params.assignmentId;
-  console.log(req.body);
   const grade = req.body.grade;
-  console.log(grade);
 
   try {
+    //Grade assignment
     let findAssignmentById = await Assignment.find({
       _id: req.params.assignmentId
     });
-
-    console.log(findAssignmentById[0].responses);
-
+    //Change score for student response
     for (i = 0; i < findAssignmentById[0].responses.length; i++) {
       if (findAssignmentById[0].responses[i].studentId == studentId) {
         findAssignmentById[0].responses[i].score = grade;
       }
     }
-
-    console.log(findAssignmentById[0].responses);
-
-    Assignment.update(
+    //Update assignment in mongo
+    Assignment.findOneAndUpdate(
       { _id: assignmentId },
-      { ...findAssignmentById },
-      (err, raw) => {
-        if (err) res.json(err);
+      { responses: findAssignmentById[0].responses },
+      { new: true, upsert: true, setDefaultsOnInsert: true },
+      (errors, raw) => {
+        if (errors) console.log(errors);
         else res.json(raw);
       }
     );
+
+    //Average all assignments together and update Class grade for student
+
+    let average = 0;
+    let count = 0;
+
+    try {
+      //findClassroom
+      let findClassById = await Classroom.findOne({
+        _id: findAssignmentById[0].classroomId
+      });
+      //Loop through assignments
+      for (i = 0; i < findClassById.assignments.length; i++) {
+        try {
+          //Find assignment
+          let thisAssignment = await Assignment.findOne({
+            _id: findClassById.assignments[i].assignmentId
+          });
+          //Loop through responses looking for the student that is being graded
+          for (k = 0; k < thisAssignment.responses.length; k++) {
+            if (thisAssignment.responses[k].studentId == studentId) {
+              average += thisAssignment.responses[k].score;
+              count++;
+            }
+          }
+        } catch (err) {
+          console.log(err);
+        }
+      }
+      //Average each grade
+      average /= count;
+
+      //Update student grade for Classroom with the new average
+
+      for (i = 0; i < findClassById.students.length; i++) {
+        if (findClassById.students[i].studentId == studentId) {
+          findClassById.students[i].grade = average;
+        }
+      }
+
+      Classroom.findOneAndUpdate(
+        { _id: findClassById._id },
+        { students: findClassById.students },
+        { new: true, upsert: true, setDefaultsOnInsert: true },
+        (errors, raw) => {
+          if (errors) console.log(errors);
+          else console.log(raw);
+        }
+      );
+    } catch (err) {
+      console.log(err);
+    }
   } catch (err) {
     res.json(err);
   }
