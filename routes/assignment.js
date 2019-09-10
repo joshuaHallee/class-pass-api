@@ -123,6 +123,7 @@ router.put("/grade/:assignmentId/for/:studentId", verify, async (req, res) => {
     for (i = 0; i < findAssignmentById[0].responses.length; i++) {
       if (findAssignmentById[0].responses[i].studentId == studentId) {
         findAssignmentById[0].responses[i].score = grade;
+        findAssignmentById[0].responses[i].isGraded = true;
       }
     }
     //Update assignment in mongo
