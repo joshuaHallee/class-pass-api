@@ -173,6 +173,7 @@ router.put("/grade/:assignmentId/for/:studentId", verify, async (req, res) => {
       for (i = 0; i < findClassById.students.length; i++) {
         if (findClassById.students[i].studentId == studentId) {
           findClassById.students[i].grade = average;
+          findClassById.students[i].isGraded = true;
         }
       }
 
