@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const https = require('https');
 const app = express();
 const port = 3000;
 require("dotenv/config");
@@ -30,6 +31,10 @@ mongoose.connect(process.env.DB_CONNECTION, { useNewUrlParser: true }, () => {
   console.log("Connected to db");
 });
 
-app.listen(port, function() {
+https.createServer({
+  key: fs.readFileSync('server.key'),
+  cert: fs.readFileSync('server.cert')
+}, app)
+.listen(port, function() {
   console.log(`Server is listening on port ${port}`);
 });
