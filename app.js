@@ -34,7 +34,7 @@ mongoose.connect(process.env.DB_CONNECTION, { useNewUrlParser: true }, () => {
 });
 
 let privateKey  = fs.readFileSync(`${__dirname}/server.key`, 'utf8');
-let certificate = fs.readFileSync(`${__dirname}/server.crt`, 'utf8');
+let certificate = fs.readFileSync(`${__dirname}/server.cert`, 'utf8');
 let credentials = {key: privateKey, cert: certificate};
 let httpServer = http.createServer(app);
 let httpsServer = https.createServer(credentials, app);
