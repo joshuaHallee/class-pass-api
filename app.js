@@ -15,13 +15,33 @@ var options = {
     cert: cert
 };
 
+var whitelist = ['http://example1.com', 'http://example2.com']
+var corsOptions = {
+    origin: function (origin, callback) {
+        if (whitelist.indexOf(origin) !== -1) {
+            callback(null, true)
+        } else {
+            callback(new Error('Not allowed by CORS'))
+        }
+    }
+};
+var whitelist = ['http://example1.com', 'http://example2.com']
+var corsOptions = {
+    origin: function (origin, callback) {
+        if (whitelist.indexOf(origin) !== -1) {
+            callback(null, true)
+        } else {
+            callback(new Error('Not allowed by CORS'))
+        }
+    }
+}
 //Import Routes
 const announcementRoute = require("./routes/announcement");
 const assignmentRoute = require("./routes/assignment");
 const classroomRoute = require("./routes/classroom");
 const authRoute = require("./routes/auth");
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET, PUT, POST");
