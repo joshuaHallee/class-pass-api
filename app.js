@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const https = require('https');
 const fs = require('fs');
+const cors = require('cors');
+
 const app = express();
 const port = 3000;
 require("dotenv/config");
@@ -19,6 +21,7 @@ const assignmentRoute = require("./routes/assignment");
 const classroomRoute = require("./routes/classroom");
 const authRoute = require("./routes/auth");
 
+app.use(cors());
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET, PUT, POST");
