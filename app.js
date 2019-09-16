@@ -25,7 +25,7 @@ var corsOptions = {
         }
     }
 };
-var whitelist = ['https://master.djujr8vlrqdzn.amplifyapp.com', 'http://classpass.tech', 'https://classpass.tech']
+var whitelist = ['https://master.djujr8vlrqdzn.amplifyapp.com', 'http://classpass.tech', 'https://classpass.tech', 'https://classpass.tech:3000', 'http://classpass.tech:3000']
 var corsOptions = {
     origin: function (origin, callback) {
         if (whitelist.indexOf(origin) !== -1) {
