@@ -10,7 +10,7 @@ const announcementRoute = require("./routes/announcement");
 const assignmentRoute = require("./routes/assignment");
 const classroomRoute = require("./routes/classroom");
 const authRoute = require("./routes/auth");
-
+//f
 //Middleware
 app.use(bodyParser.json());
 app.use("/api/announcement", announcementRoute);
