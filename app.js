@@ -25,7 +25,7 @@ var corsOptions = {
         }
     }
 };
-var whitelist = ['http://example1.com', 'http://example2.com']
+var whitelist = ['https://master.djujr8vlrqdzn.amplifyapp.com', 'http://classpass.tech', 'https://classpass.tech']
 var corsOptions = {
     origin: function (origin, callback) {
         if (whitelist.indexOf(origin) !== -1) {
