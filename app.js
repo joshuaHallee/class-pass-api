@@ -8,9 +8,9 @@ const cors = require('cors');
 const app = express();
 const port = 3000;
 require("dotenv/config");
-const privateKey = fs.readFileSync('/etc/letsencrypt/live/classpassapi.host/privkey.pem', 'utf8');
-const certificate = fs.readFileSync('/etc/letsencrypt/live/classpassapi.host/cert.pem', 'utf8');
-const ca = fs.readFileSync('/etc/letsencrypt/live/yourdomain.com/chain.pem', 'utf8');
+const privateKey = fs.readFileSync('/etc/letsencrypt/live/www.classpassapi.host/privkey.pem', 'utf8');
+const certificate = fs.readFileSync('/etc/letsencrypt/live/www.classpassapi.host/cert.pem', 'utf8');
+const ca = fs.readFileSync('/etc/letsencrypt/live/www.classpassapi.host/chain.pem', 'utf8');
 var options = {
     key: privateKey,
     cert: certificate,
