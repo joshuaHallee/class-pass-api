@@ -8,11 +8,13 @@ const cors = require('cors');
 const app = express();
 const port = 3000;
 require("dotenv/config");
-var key = fs.readFileSync(__dirname + '/selfsigned.key');
-var cert = fs.readFileSync(__dirname + '/selfsigned.crt');
+const privateKey = fs.readFileSync('/etc/letsencrypt/live/classpassapi.host/privkey.pem', 'utf8');
+const certificate = fs.readFileSync('/etc/letsencrypt/live/classpassapi.host/cert.pem', 'utf8');
+const ca = fs.readFileSync('/etc/letsencrypt/live/yourdomain.com/chain.pem', 'utf8');
 var options = {
-    key: key,
-    cert: cert
+    key: privateKey,
+    cert: certificate,
+    ca: ca
 };
 
 var whitelist = ['http://example1.com', 'http://example2.com']
